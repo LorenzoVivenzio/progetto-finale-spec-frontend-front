@@ -32,7 +32,7 @@ export function useGames() {
                 body: JSON.stringify(nuovoGioco),
             });
             const risultato = await response.json();
-            console.log("Risposta backend:", risultato); // ← aggiungi questo
+            console.log("Risposta backend:", risultato); 
             await fetchGames();
         } catch (err) {
             console.error("Errore aggiunta gioco", err);

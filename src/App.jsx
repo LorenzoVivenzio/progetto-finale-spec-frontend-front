@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-import { useGames } from "./components/useGames";
-import GameModal from "./components/GameModal";
+import { useGames } from './components/useGames'
+import GameModal from './components/GameModal'
 
 function App() {
 
@@ -25,7 +25,7 @@ function App() {
 
   // STATI PER IL MODALE CRUD
   const [modalOpen, setModalOpen] = useState(false)
-  const [gameToEdit, setGameToEdit] = useState(null) // null = create, oggetto = edit
+  const [gameToEdit, setGameToEdit] = useState(null)
 
   // Hook custom CRUD
   const { games, loading, error, fetchGames, addGame, deleteGame, updateGame } = useGames()
@@ -45,7 +45,7 @@ function App() {
     localStorage.setItem("miei_preferiti", JSON.stringify(favorites))
   }, [favorites])
 
-  // Caricamento lista principale (ora usa fetchGames dal hook)
+  // Caricamento lista principale
   useEffect(() => {
     fetchGames(debouncedSearch, category)
   }, [debouncedSearch, category, fetchGames])
@@ -102,173 +102,220 @@ function App() {
     }
   };
 
-  // Logica modale: salva sia in create che in edit
-  const handleSave = (formData) => {
+  // Logica modale
+  const handleSave = async (formData) => {
     if (gameToEdit) {
-      updateGame(gameToEdit.id, formData);
+      await updateGame(gameToEdit.id, formData);
     } else {
-      addGame(formData);
+      await addGame(formData);
     }
+    fetchGames(debouncedSearch, category);
   };
 
 
   return (
-    <div className="container mt-5">
-      {!selectedGameId ? (
-        <>
-          <h1 className="text-center mb-4">Lista giochi</h1>
+    <div style={{ backgroundColor: "#f4f6f8", minHeight: "100vh" }}>
 
-          {/* PULSANTE AGGIUNGI */}
-          <div className="mb-3">
-            <button
-              onClick={() => { setGameToEdit(null); setModalOpen(true); }}
-              className="btn btn-success"
-            >
-              + Aggiungi Gioco
-            </button>
-          </div>
+      {/* NAVBAR */}
+      <nav className="navbar navbar-dark bg-dark px-4 mb-4 shadow-sm">
+        <span className="navbar-brand fw-bold fs-4">🎮 GameCompare</span>
+        {!selectedGameId && (
+          <button
+            onClick={() => { setGameToEdit(null); setModalOpen(true); }}
+            className="btn btn-outline-light btn-sm"
+          >
+            + Aggiungi Gioco
+          </button>
+        )}
+      </nav>
 
-          {/* SEZIONE FILTRI */}
-          <div className="row g-3 mb-4">
-            <div className="col-md-4">
-              <input type="search" className="form-control"
-                placeholder="Cerca titolo..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)} />
-            </div>
-            <div className="col-md-4">
-              <select className="form-select" value={category} onChange={(e) => setCategory(e.target.value)}>
-                <option value="">Tutte le categorie</option>
-                <option value="RPG">RPG</option>
-                <option value="Action">Action</option>
-                <option value="Adventure">Adventure</option>
-                <option value="Simulation">Simulation</option>
-              </select>
-            </div>
-            <div className="col-md-4">
-              <select className="form-select" value={order} onChange={(e) => setOrder(e.target.value)}>
-                <option value="asc">A-Z</option>
-                <option value="desc">Z-A</option>
-              </select>
-            </div>
-          </div>
-
-          {/* STATI VUOTI / LOADING / ERRORE */}
-          {loading && <div className="text-center py-4">Caricamento...</div>}
-          {error && <div className="alert alert-danger">{error}</div>}
-          {!loading && !error && sortedGames.length === 0 && (
-            <div className="alert alert-warning">Nessun gioco trovato.</div>
-          )}
-
-          {/* LISTA GIOCHI */}
-          <div className="row">
-            {sortedGames.map((game) => (
-              <div key={game.id} className="col-md-4 mb-4">
-                <div className="card h-100 shadow-sm">
-                  <div className="card-body text-center">
-                    <h5 className="fw-bold">{game.title}</h5>
-                    <p className="badge bg-info text-dark">{game.category}</p>
-                  </div>
-                  <div className="card-footer bg-transparent border-0 d-flex gap-2">
-                    <button onClick={() => getGameDetail(game.id)} className="btn btn-primary btn-sm flex-grow-1">Dettagli</button>
-                    <button onClick={() => toggleFavorite(game)} className="btn btn-outline-danger btn-sm">
-                      {favorites.some(f => f.id === game.id) ? '❤️' : '🤍'}
-                    </button>
-                    <button
-                      onClick={() => addToCompare(game)}
-                      className={`btn btn-sm ${compareList.some(g => g.id === game.id) ? 'btn-success' : 'btn-outline-success'}`}
-                    >
-                      Confronta
-                    </button>
-                    {/* PULSANTI EDIT E DELETE */}
-                    <button
-                      onClick={() => { setGameToEdit(game); setModalOpen(true); }}
-                      className="btn btn-warning btn-sm"
-                    >✏️</button>
-                    <button
-                      onClick={() => deleteGame(game.id)}
-                      className="btn btn-danger btn-sm"
-                    >🗑️</button>
-                  </div>
+      <div className="container pb-5">
+        {!selectedGameId ? (
+          <>
+            {/* SEZIONE FILTRI */}
+            <div className="card border-0 shadow-sm mb-4 p-3">
+              <div className="row g-3">
+                <div className="col-md-4">
+                  <input type="search" className="form-control"
+                    placeholder="🔍 Cerca titolo..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)} />
+                </div>
+                <div className="col-md-4">
+                  <select className="form-select" value={category} onChange={(e) => setCategory(e.target.value)}>
+                    <option value="">Tutte le categorie</option>
+                    <option value="RPG">RPG</option>
+                    <option value="Action">Action</option>
+                    <option value="Adventure">Adventure</option>
+                    <option value="Simulation">Simulation</option>
+                  </select>
+                </div>
+                <div className="col-md-4">
+                  <select className="form-select" value={order} onChange={(e) => setOrder(e.target.value)}>
+                    <option value="asc">A → Z</option>
+                    <option value="desc">Z → A</option>
+                  </select>
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* PREFERITI */}
-          {favorites.length > 0 && (
-            <div className="alert alert-secondary mt-4">
-              <strong>Preferiti:</strong> {favorites.map(f => f.title).join(" - ")}
             </div>
-          )}
 
-          {/* Comparatore giochi */}
-          {compareList.length === 2 && (
-            <div className="mt-5 p-4 border border-primary rounded bg-white shadow">
-              <h2 className="text-center mb-4">⚖️ Confronto Record</h2>
-              <table className="table table-bordered align-middle text-center">
-                <thead className="table-light">
-                  <tr>
-                    <th>Caratteristica</th>
-                    <th>{compareList[0].title}</th>
-                    <th>{compareList[1].title}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>Prezzo</strong></td>
-                    <td>€{compareList[0].price}</td>
-                    <td>€{compareList[1].price}</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Rating</strong></td>
-                    <td>⭐ {compareList[0].rating}</td>
-                    <td>⭐ {compareList[1].rating}</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Developer</strong></td>
-                    <td>{compareList[0].developer}</td>
-                    <td>{compareList[1].developer}</td>
-                  </tr>
-                </tbody>
-              </table>
-              <div className="text-center mt-3">
-                <button onClick={() => setCompareList([])} className="btn btn-secondary">Svuota Confronto</button>
+            {/* STATI VUOTI / LOADING / ERRORE */}
+            {loading && (
+              <div className="text-center py-5 text-secondary">
+                <div className="spinner-border mb-2" role="status" />
+                <p>Caricamento...</p>
               </div>
-            </div>
-          )}
+            )}
+            {error && <div className="alert alert-danger">{error}</div>}
+            {!loading && !error && sortedGames.length === 0 && (
+              <div className="alert alert-warning text-center">Nessun gioco trovato.</div>
+            )}
 
-        </>
-      ) : (
-        /* PAGINA DI DETTAGLIO */
-        <div className="card shadow-lg p-4">
-          <div className="mb-4">
-            <button onClick={() => { setSelectedGameId(null); setDetailGame(null); }} className="btn btn-outline-secondary">
-              ← Torna alla lista
-            </button>
-          </div>
-
-          {detailGame && detailGame.game ? (
+            {/* LISTA GIOCHI */}
             <div className="row">
-              <div className="col-md-12">
-                <h1 className="display-4">{detailGame.game.title}</h1>
-                <span className="badge bg-primary mb-3">{detailGame.game.category}</span>
-                <hr />
-                <div className="alert alert-light border">
-                  <h3 className="text-success fw-bold">Prezzo: €{detailGame.game.price}</h3>
-                  <p className="mb-0">Valutazione: ⭐ {detailGame.game.rating} / 5</p>
-                  <p className="mt-2"><strong>Sviluppatore:</strong> {detailGame.game.developer}</p>
+              {sortedGames.map((game) => (
+                <div key={game.id} className="col-md-4 mb-4">
+                  <div className="card h-100 border-0 shadow-sm">
+                    <div className="card-body">
+                      <span className="badge bg-secondary mb-2">{game.category}</span>
+                      <h5 className="card-title fw-bold">{game.title}</h5>
+                    </div>
+                    <div className="card-footer bg-white border-top d-flex flex-wrap gap-2 py-2">
+                      <button onClick={() => getGameDetail(game.id)} className="btn btn-dark btn-sm flex-grow-1">
+                        Dettagli
+                      </button>
+                      <button onClick={() => toggleFavorite(game)} className="btn btn-outline-danger btn-sm" title="Preferiti">
+                        {favorites.some(f => f.id === game.id) ? '❤️' : '🤍'}
+                      </button>
+                      <button
+                        onClick={() => addToCompare(game)}
+                        className={`btn btn-sm ${compareList.some(g => g.id === game.id) ? 'btn-success' : 'btn-outline-success'}`}
+                        title="Confronta"
+                      >
+                        ⚖️
+                      </button>
+                      {/* PULSANTI EDIT E DELETE */}
+                      <button
+                        onClick={() => { setGameToEdit(game); setModalOpen(true); }}
+                        className="btn btn-outline-warning btn-sm"
+                        title="Modifica"
+                      >Modifica</button>
+                      <button
+                        onClick={async () => { await deleteGame(game.id); fetchGames(debouncedSearch, category); }}
+                        className="btn btn-outline-danger btn-sm"
+                        title="Elimina"
+                      >Elimina</button>
+                    </div>
+                  </div>
                 </div>
-                <p className="fs-5">{detailGame.game.description}</p>
-              </div>
+              ))}
             </div>
-          ) : (
-            <div className="text-center py-5">Caricamento...</div>
-          )}
-        </div>
-      )}
 
-      {/* MODALE CRUD (create / edit) */}
+            {/* PREFERITI */}
+            {favorites.length > 0 && (
+              <div className="card border-0 shadow-sm mt-2 mb-4 p-3">
+                <p className="mb-0">
+                  <strong>❤️ Preferiti:</strong>{" "}
+                  {favorites.map(f => (
+                    <span key={f.id} className="badge bg-danger me-1">{f.title}</span>
+                  ))}
+                </p>
+              </div>
+            )}
+
+            {/* Comparatore giochi */}
+            {compareList.length === 2 && (
+              <div className="card border-0 shadow mt-2">
+                <div className="card-header bg-dark text-white text-center fw-bold fs-5">
+                  ⚖️ Confronto Record
+                </div>
+                <div className="card-body p-0">
+                  <table className="table table-bordered table-hover align-middle text-center mb-0">
+                    <thead className="table-dark">
+                      <tr>
+                        <th>Caratteristica</th>
+                        <th>{compareList[0].title}</th>
+                        <th>{compareList[1].title}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="fw-semibold text-secondary">Prezzo</td>
+                        <td>€{compareList[0].price}</td>
+                        <td>€{compareList[1].price}</td>
+                      </tr>
+                      <tr>
+                        <td className="fw-semibold text-secondary">Rating</td>
+                        <td>⭐ {compareList[0].rating}</td>
+                        <td>⭐ {compareList[1].rating}</td>
+                      </tr>
+                      <tr>
+                        <td className="fw-semibold text-secondary">Developer</td>
+                        <td>{compareList[0].developer}</td>
+                        <td>{compareList[1].developer}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div className="card-footer text-center bg-white border-0 py-3">
+                  <button onClick={() => setCompareList([])} className="btn btn-outline-secondary btn-sm">
+                    Svuota Confronto
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </>
+        ) : (
+          /* PAGINA DI DETTAGLIO */
+          <div className="card border-0 shadow-sm">
+            <div className="card-header bg-white border-bottom py-3">
+              <button
+                onClick={() => { setSelectedGameId(null); setDetailGame(null); }}
+                className="btn btn-outline-dark btn-sm"
+              >
+                ← Torna alla lista
+              </button>
+            </div>
+
+            {detailGame && detailGame.game ? (
+              <div className="card-body p-4">
+                <span className="badge bg-secondary mb-2">{detailGame.game.category}</span>
+                <h1 className="fw-bold mb-3">{detailGame.game.title}</h1>
+                <hr />
+                <div className="row g-3 mb-3">
+                  <div className="col-md-4">
+                    <div className="card border-0 bg-light text-center p-3">
+                      <div className="text-secondary small">Prezzo</div>
+                      <div className="fw-bold fs-4 text-success">€{detailGame.game.price}</div>
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <div className="card border-0 bg-light text-center p-3">
+                      <div className="text-secondary small">Rating</div>
+                      <div className="fw-bold fs-4"> {detailGame.game.rating} / 10</div>
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <div className="card border-0 bg-light text-center p-3">
+                      <div className="text-secondary small">Sviluppatore</div>
+                      <div className="fw-bold">{detailGame.game.developer}</div>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-secondary fs-6">{detailGame.game.description}</p>
+              </div>
+            ) : (
+              <div className="text-center py-5 text-secondary">
+                <div className="spinner-border mb-2" role="status" />
+                <p>Caricamento...</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* MODALE CRUD */}
       {modalOpen && (
         <GameModal
           game={gameToEdit}
