@@ -3,7 +3,16 @@ import { useState } from 'react';
 function GameModal({ game, onSave, onClose }) {
 
     const [formData, setFormData] = useState(
-        game || { title: "", category: "", price: "", rating: "", developer: "", description: "", platform: "", hours: "" }
+        game ? {
+            title: game.title || "",
+            category: game.category || "",
+            price: game.price ?? "",
+            rating: game.rating ?? "",
+            developer: game.developer || "",
+            description: game.description || "",
+            platform: game.platform || "",
+            hours: game.hours ?? "",
+        } : { title: "", category: "", price: "", rating: "", developer: "", description: "", platform: "", hours: "" }
     );
 
     const handleChange = (e) => {
@@ -13,7 +22,11 @@ function GameModal({ game, onSave, onClose }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         onSave({
-            ...formData,
+            title: formData.title,
+            category: formData.category,
+            description: formData.description,
+            developer: formData.developer,
+            platform: formData.platform,
             price: Number(formData.price),
             rating: Number(formData.rating),
             hours: Number(formData.hours),
@@ -22,7 +35,7 @@ function GameModal({ game, onSave, onClose }) {
     };
 
     return (
-        <div className="modal d-block" style={{ background: "rgba(0,0,0,0.6)" }}>
+        <div className="modal d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
             <div className="modal-dialog modal-dialog-centered">
                 <div className="modal-content border-0 shadow-lg">
 

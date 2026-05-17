@@ -26,27 +26,22 @@ export function useGames() {
     // Aggiungi gioco
     const addGame = async (nuovoGioco) => {
         try {
-            const response = await fetch(`${url}/games`, {
+            await fetch(`${url}/games`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(nuovoGioco),
             });
-            const risultato = await response.json();
-            console.log("Risposta backend:", risultato); 
-            await fetchGames();
         } catch (err) {
             console.error("Errore aggiunta gioco", err);
         }
     };
 
-    
     // Elimina Gioco
     const deleteGame = async (id) => {
         try {
             await fetch(`${url}/games/${id}`, {
                 method: "DELETE",
             });
-            await fetchGames();
         } catch (err) {
             console.error("Errore eliminazione gioco", err);
         }
@@ -60,7 +55,6 @@ export function useGames() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(datiAggiornati),
             });
-            await fetchGames();
         } catch (err) {
             console.error("Errore modifica gioco", err);
         }

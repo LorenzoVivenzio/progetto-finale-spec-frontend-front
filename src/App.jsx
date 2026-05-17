@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import { useGames } from './components/useGames'
 import GameModal from './components/GameModal'
@@ -195,8 +195,15 @@ function App() {
                         ⚖️
                       </button>
                       {/* PULSANTI EDIT E DELETE */}
+                      {/* PULSANTI EDIT E DELETE */}
                       <button
-                        onClick={() => { setGameToEdit(game); setModalOpen(true); }}
+                        onClick={async () => {
+                          const response = await fetch(`http://localhost:3001/games/${game.id}`);
+                          const dati = await response.json();
+                          const gameCompleto = dati.game ? dati.game : dati;
+                          setGameToEdit(gameCompleto);
+                          setModalOpen(true);
+                        }}
                         className="btn btn-outline-warning btn-sm"
                         title="Modifica"
                       >Modifica</button>
@@ -329,3 +336,4 @@ function App() {
 }
 
 export default App;
+
